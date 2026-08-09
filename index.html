@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#173f35" />
+    <title>研途奖励册｜考研每日奖励系统</title>
+    <meta name="description" content="本地运行的四个月考研学习打卡与奖励计算工具" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div><strong>研途奖励册</strong><small>4 个月冲刺计划</small></div>
+        </div>
+        <nav class="nav-list" aria-label="主要功能">
+          <button class="nav-item active" data-view="dashboard"><span>总览</span><small>01</small></button>
+          <button class="nav-item" data-view="checkin"><span>每日打卡</span><small>02</small></button>
+          <button class="nav-item" data-view="stages"><span>周与阶段</span><small>03</small></button>
+          <button class="nav-item" data-view="history"><span>历史记录</span><small>04</small></button>
+          <button class="nav-item" data-view="settings"><span>规则与数据</span><small>05</small></button>
+        </nav>
+        <div class="sidebar-foot">
+          <p>总奖励预算</p>
+          <strong>$2,000</strong>
+          <div class="mini-progress"><span id="sideProgress"></span></div>
+          <small id="sideBudgetText">正在计算…</small>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <button class="menu-button" id="menuButton" aria-label="打开菜单">菜单</button>
+          <div>
+            <p class="eyebrow" id="todayLabel">今日进度</p>
+            <h1 id="pageTitle">把每一天的努力，变成看得见的奖励。</h1>
+          </div>
+          <div class="phase-chip" id="phaseChip"><span></span><div><small>当前阶段</small><strong>加载中</strong></div></div>
+        </header>
+
+        <section class="view active" id="view-dashboard">
+          <div class="hero-grid">
+            <article class="hero-card dark-card">
+              <div class="hero-top"><span class="pill light">今日奖励预估</span><span id="todayStatus">尚未打卡</span></div>
+              <div class="hero-value"><small>$</small><strong id="todayReward">0.00</strong></div>
+              <p id="todayRewardHint">完成今天的记录，即可看到本周奖励贡献。</p>
+              <button class="primary light-button" data-go="checkin">开始今日打卡 <span>→</span></button>
+              <div class="orb orb-one"></div><div class="orb orb-two"></div>
+            </article>
+            <article class="hero-card score-card">
+              <div class="score-ring" id="scoreRing"><div><strong id="todayScore">—</strong><small>/ 100</small></div></div>
+              <div class="score-copy"><span class="pill amber">今日表现</span><h2 id="scoreTitle">等待记录</h2><p id="scoreHint">评分由学习时长、任务、复盘、作息、运动和诚信六项构成。</p></div>
+            </article>
+          </div>
+
+          <div id="alertArea" class="alert-area" aria-live="polite"></div>
+          <div id="overtimeReminder" class="overtime-reminder" role="status" aria-live="polite"></div>
+
+          <div class="metric-grid">
+            <article class="metric-card"><div class="metric-head"><span>本周预计</span><span class="metric-icon green">周</span></div><strong id="weekReward">$0</strong><p id="weekMeta">尚无记录</p><div class="microbar"><span id="weekBar"></span></div></article>
+            <article class="metric-card"><div class="metric-head"><span>累计已获</span><span class="metric-icon amber">奖</span></div><strong id="earnedTotal">$0</strong><p id="earnedMeta">含已解锁补救奖励</p><div class="microbar amber-bar"><span id="earnedBar"></span></div></article>
+            <article class="metric-card"><div class="metric-head"><span>补救池</span><span class="metric-icon blue">补</span></div><strong id="recoveryTotal">$0</strong><p id="recoveryMeta">后续优秀周可解锁</p><div class="microbar blue-bar"><span id="recoveryBar"></span></div></article>
+            <article class="metric-card"><div class="metric-head"><span>预算剩余</span><span class="metric-icon coral">余</span></div><strong id="remainingTotal">$2,000</strong><p id="remainingMeta">总预算安全</p><div class="microbar coral-bar"><span id="remainingBar"></span></div></article>
+          </div>
+
+          <div class="content-grid">
+            <article class="panel chart-panel">
+              <div class="panel-head"><div><p class="eyebrow">近 14 天</p><h2>学习得分趋势</h2></div><div class="legend"><span><i class="dot green-dot"></i>每日得分</span><span><i class="dot amber-dot"></i>80 分参考线</span></div></div>
+              <div class="chart-wrap"><canvas id="scoreChart" height="260" aria-label="近14天每日得分折线图"></canvas></div>
+            </article>
+            <article class="panel current-plan">
+              <div class="panel-head"><div><p class="eyebrow">当前阶段</p><h2 id="currentStageName">建立节奏</h2></div><span class="stage-week" id="currentWeekLabel">第 1 周</span></div>
+              <div class="stage-budget-line"><div><strong id="stageEarned">$0</strong><small id="stageBudget">/ $300</small></div><span id="stagePercent">0%</span></div>
+              <div class="big-progress"><span id="stageBar"></span></div>
+              <div class="plan-details"><div><span>本周平均分</span><strong id="currentWeekScore">—</strong></div><div><span>有效打卡</span><strong id="currentWeekDays">0 / 7 天</strong></div><div><span>阶段补救池</span><strong id="currentStagePool">$0</strong></div></div>
+              <p class="rule-note" id="recoveryHint">本周达到 90 分且打卡至少 6 天，可释放补救池。</p>
+            </article>
+          </div>
+
+          <article class="panel weekly-strip">
+            <div class="panel-head"><div><p class="eyebrow">最近四周</p><h2>奖励兑现节奏</h2></div><button class="text-button" data-go="stages">查看全部阶段 →</button></div>
+            <div class="week-cards" id="recentWeeks"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-checkin">
+          <div class="section-intro"><div><p class="eyebrow">每日记录</p><h2>今天，向目标靠近了多少？</h2><p>填写六项记录，系统即时算出 100 分评分和奖励预估。</p></div><div class="date-box"><label for="checkinDate">打卡日期</label><input id="checkinDate" type="date" /></div></div>
+          <div class="today-control-grid">
+            <article class="panel daily-tasks-card">
+              <div class="panel-head"><div><p class="eyebrow">先完成，再娱乐</p><h2>今日三项核心任务</h2></div><span class="soft-tag" id="dailyTaskProgress">0 / 3</span></div>
+              <p class="control-help">勾选完成前请填写具体成果或证据，任务和额度会自动保存在本机。</p>
+              <div id="dailyTasks" class="daily-tasks"></div>
+            </article>
+            <article class="panel entertainment-card">
+              <div class="panel-head"><div><p class="eyebrow">当日一个额度</p><h2>娱乐计时</h2></div><button type="button" class="text-button" id="enableNotifications">开启提醒</button></div>
+              <div class="allowance-metrics">
+                <div><span>已解锁</span><strong id="allowanceMinutes">0 分钟</strong></div>
+                <div><span>已使用</span><strong id="allowanceUsed">00:00</strong></div>
+                <div><span>剩余</span><strong id="allowanceRemaining">00:00</strong></div>
+              </div>
+              <p class="next-tier" id="nextTierCondition">完成至少一项核心任务可解锁 30 分钟。</p>
+              <div class="active-timer" id="activeTimer" aria-live="polite">
+                <span>当前娱乐时段</span><strong class="timer-digits" id="currentSession">00:00:00</strong>
+                <small>距 <b id="cutoffTimeLabel">22:30</b> 截止：<b id="cutoffCountdown">--:--:--</b></small>
+              </div>
+              <div class="allowance-actions">
+                <button type="button" class="primary" id="startEntertainment">开始娱乐</button>
+                <button type="button" class="secondary" id="pauseEntertainment">暂停娱乐</button>
+              </div>
+              <div class="routine-time-fields">
+                <div><label for="sleepTime">实际入睡时间</label><input id="sleepTime" type="time" /></div>
+                <div><label for="wakeTime">次日起床时间</label><input id="wakeTime" type="time" /></div>
+              </div>
+              <div class="routine-record-actions"><button type="button" class="secondary" id="saveSleepRecord">保存作息记录</button><p id="routineReason" role="status" aria-live="polite">补全入睡和次日起床时间后，系统会自动计算作息项。</p></div>
+              <p class="entertainment-notice" id="entertainmentNotice" role="status" aria-live="polite"></p>
+            </article>
+          </div>
+          <div class="checkin-layout">
+            <form class="panel checkin-form" id="checkinForm">
+              <div class="form-section"><div class="form-title"><span>01</span><div><h3>核心学习</h3><p>学习时长 25 分，任务完成率 30 分</p></div></div>
+                <div class="field-grid">
+                  <label class="field" for="studyHours"><span>有效学习时长</span><div class="input-with-unit"><input id="studyHours" type="number" min="0" max="16" step="0.5" value="8" required /><em>小时</em></div><small>达到 8 小时可得满分</small></label>
+                  <label class="field" for="taskRate"><span>任务完成率 <b id="taskValue">85%</b></span><input id="taskRate" type="range" min="0" max="100" step="5" value="85" /><div class="range-labels"><small>0%</small><small>100%</small></div></label>
+                </div>
+              </div>
+              <div class="form-section"><div class="form-title"><span>02</span><div><h3>学习质量与状态</h3><p>选择最符合当天实际的完成程度</p></div></div><div class="quality-grid" id="qualityFields"></div></div>
+              <div class="form-section"><div class="form-title"><span>03</span><div><h3>今日备注</h3><p>可记录完成内容、困难或明日重点</p></div></div><label class="field" for="notes"><textarea id="notes" rows="4" maxlength="240" placeholder="例如：完成英语真题两篇；数学错题集中在概率论，明天优先复盘。"></textarea><small class="align-right"><span id="noteCount">0</span> / 240</small></label></div>
+              <div class="form-actions"><button type="button" class="secondary" id="resetForm">重置</button><button type="submit" class="primary">保存今日打卡 <span>→</span></button></div>
+            </form>
+            <aside class="live-score">
+              <div class="live-card"><p>实时得分</p><div class="live-ring" id="liveRing"><strong id="liveScore">85</strong><small>分</small></div><h3 id="liveLevel">状态很好</h3><p id="liveMessage">保持真实记录，稳定比单日冲高更重要。</p></div>
+              <div class="breakdown-card"><h3>得分构成</h3><div id="scoreBreakdown"></div><div class="estimate-row"><span>今日奖励贡献预估</span><strong id="liveReward">$0.00</strong></div><small>最终以整周平均分、有效打卡天数和阶段预算为准。</small></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-stages">
+          <div class="section-intro"><div><p class="eyebrow">16 周奖励路线</p><h2>四阶段预算与补救进度</h2><p>阶段之间预算独立，未兑现奖励仅可在本阶段内补救。</p></div></div>
+          <div class="stage-summary" id="stageSummary"></div>
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">逐周明细</p><h2>奖励计算表</h2></div><span class="soft-tag">自动计算</span></div>
+            <div class="table-wrap"><table><thead><tr><th>周次</th><th>阶段</th><th>打卡</th><th>平均分</th><th>基础比例</th><th>周奖励</th><th>补救释放</th><th>状态</th></tr></thead><tbody id="weeklyTable"></tbody></table></div>
+          </article>
+          <div class="bonus-grid">
+            <article class="panel bonus-card"><div><span class="bonus-index">A</span><h3>考试完成奖</h3><p>认真参加并完成所有考试科目。</p></div><div><strong>$100</strong><label class="switch" for="examCompleted"><input id="examCompleted" type="checkbox" /><span></span><em>已完成</em></label></div></article>
+            <article class="panel bonus-card"><div><span class="bonus-index">B</span><h3>目标达成奖</h3><p>达到事先约定的目标分数或复试线。</p></div><div><strong>$100</strong><label class="switch" for="targetReached"><input id="targetReached" type="checkbox" /><span></span><em>已达成</em></label></div></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-history">
+          <div class="section-intro"><div><p class="eyebrow">所有记录</p><h2>回看努力，也看见规律。</h2><p>可筛选、编辑或删除记录；修改后所有奖励会自动重算。</p></div><button class="primary" data-go="checkin">新增打卡 <span>＋</span></button></div>
+          <div class="insight-chart-grid">
+            <article class="panel chart-panel">
+              <div class="panel-head"><div><p class="eyebrow">按日汇总</p><h2>每日娱乐时长</h2></div><div class="legend"><span><i class="dot blue-dot"></i>实际使用分钟</span></div></div>
+              <div class="chart-wrap insight-chart-wrap"><canvas id="entertainmentChart" height="260" aria-label="每日娱乐时长折线图，纵轴单位为分钟"></canvas></div>
+            </article>
+            <article class="panel chart-panel">
+              <div class="panel-head"><div><p class="eyebrow">跨午夜时间轴</p><h2>入睡与起床趋势</h2></div><div class="legend"><span><i class="dot green-dot"></i>入睡</span><span><i class="dot amber-dot"></i>次日起床</span></div></div>
+              <div class="chart-wrap insight-chart-wrap"><canvas id="sleepChart" height="260" aria-label="入睡与次日起床时间趋势图，纵轴为睡眠日时间"></canvas></div>
+            </article>
+          </div>
+          <article class="panel history-panel">
+            <div class="filter-row"><label for="historySearch">搜索备注<input id="historySearch" type="search" placeholder="输入关键词" /></label><label for="historyStage">阶段<select id="historyStage"><option value="all">全部阶段</option><option value="1">第一阶段</option><option value="2">第二阶段</option><option value="3">第三阶段</option><option value="4">第四阶段</option></select></label><label for="historyScore">得分<select id="historyScore"><option value="all">全部得分</option><option value="90">90 分及以上</option><option value="80">80–89 分</option><option value="below80">80 分以下</option></select></label><label for="historyCompliance">娱乐守约<select id="historyCompliance"><option value="all">全部</option><option value="ontime">按时</option><option value="overtime">超时</option></select></label><button class="secondary" id="clearFilters">清除筛选</button></div>
+            <div class="history-list" id="historyList"></div>
+            <div class="empty-state" id="historyEmpty" role="status" aria-live="polite"><strong>没有匹配的记录</strong><p>调整筛选条件，或新增一次打卡。</p></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-settings">
+          <div class="section-intro"><div><p class="eyebrow">规则与数据</p><h2>清楚规则，安心坚持。</h2><p>所有数据仅保存在当前浏览器中；建议定期导出 JSON 备份。</p></div></div>
+          <div class="settings-grid">
+            <article class="panel settings-card"><div class="settings-icon">计</div><h3>100 分评分规则</h3><div class="rule-list"><div><span>有效学习时长</span><strong>25 分</strong></div><div><span>任务完成率</span><strong>30 分</strong></div><div><span>错题复盘</span><strong>15 分</strong></div><div><span>规律作息</span><strong>10 分</strong></div><div><span>适度运动</span><strong>10 分</strong></div><div><span>诚信记录</span><strong>10 分</strong></div></div></article>
+            <article class="panel settings-card"><div class="settings-icon amber-bg">周</div><h3>周奖励比例</h3><div class="rule-list"><div><span>90–100 分</span><strong>100%</strong></div><div><span>85–89 分</span><strong>90%</strong></div><div><span>75–84 分</span><strong>75%</strong></div><div><span>60–74 分</span><strong>50%</strong></div><div><span>60 分以下</span><strong>0%</strong></div></div><p class="footnote">少于 5 天打卡时，再乘以“打卡天数 ÷ 5”。</p></article>
+            <article class="panel settings-card wide"><div class="settings-icon blue-bg">补</div><h3>未达标奖励池与补救机制</h3><p>每周未兑现部分进入该阶段的补救池。后续同阶段任一周达到 <b>平均 90 分且至少打卡 6 天</b>，即可额外释放不超过当周预算 25% 的补救奖励。阶段结束后未释放部分锁定，不转入下一阶段。</p><div class="formula">实际周奖励 = 周预算 × 得分比例 × 打卡覆盖率 ＋ 当周补救释放</div></article>
+            <article class="panel settings-card wide routine-settings-card"><div class="settings-icon amber-bg">息</div><div class="data-copy"><h3>娱乐截止与作息目标</h3><p>当天已有娱乐会话时，修改会自动排到次日生效。</p></div><div class="settings-time-grid"><div><label for="reminderTimeSetting">收尾提醒时间</label><input id="reminderTimeSetting" type="time" /></div><div><label for="cutoffTimeSetting">娱乐硬截止时间</label><input id="cutoffTimeSetting" type="time" /></div><div><label for="sleepTargetSetting">计划入睡时间</label><input id="sleepTargetSetting" type="time" /></div><div><label for="wakeTargetSetting">计划起床时间</label><input id="wakeTargetSetting" type="time" /></div></div><div class="routine-settings-action"><button class="secondary" id="saveRoutineSettings">保存时间设置</button><p id="routineSettingsStatus" role="status" aria-live="polite"></p></div></article>
+            <article class="panel settings-card wide plan-setting-card"><div class="settings-icon">始</div><div class="data-copy"><h3>计划起始日期</h3><p>阶段和周次均从该日期起算；修改后现有记录会自动重新归类。</p></div><div class="plan-date-action"><input id="planStartDate" type="date" /><button class="secondary" id="saveStartDate">保存日期</button></div></article>
+            <article class="panel settings-card wide data-card"><div class="settings-icon coral-bg">数</div><div class="data-copy"><h3>数据备份与导出</h3><p>CSV 仅用于表格分析；JSON 会完整备份学习、奖励、任务、娱乐、作息、设置和修改日志，可用于恢复。</p></div><div class="data-actions"><button class="secondary" id="exportCsv">导出分析 CSV</button><button class="secondary" id="exportJson">备份完整 JSON</button><label class="secondary file-button" for="importJson">导入 JSON<input id="importJson" type="file" accept="application/json,.json" /></label></div></article>
+            <article class="panel settings-card wide change-log-card"><div class="settings-icon blue-bg">改</div><div class="data-copy"><h3>最近修改日志</h3><p>当天曾解锁娱乐后，核心任务、学习和作息字段的真实修改会记录在这里。</p></div><div id="recentChangeLogs" class="change-log-list" role="status" aria-live="polite"></div></article>
+            <article class="panel settings-card wide danger-card"><div><h3>示例与本地数据</h3><p>“清空示例数据”只在当前数据可识别为系统示例时显示；“清空全部”只重置研途奖励册自己的本地数据。</p></div><div class="danger-actions"><button class="secondary" id="restoreSample">恢复示例数据</button><button class="danger-button" id="clearSampleData">清空示例数据</button><button class="danger-button" id="clearAllData">清空全部本地数据</button></div></article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="modal-backdrop" id="confirmModal" aria-hidden="true"><div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle"><h3 id="confirmTitle">确认操作</h3><p id="confirmMessage"></p><div><button class="secondary" id="confirmCancel">取消</button><button class="danger-button" id="confirmOk">确认</button></div></div></div>
+    <script src="engine.js"></script>
+    <script src="entertainment-engine.js"></script>
+    <script src="storage.js"></script>
+    <script src="insights.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
